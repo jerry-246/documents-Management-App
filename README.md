@@ -19,8 +19,8 @@ This app uses Drizzle ORM over a plain Postgres connection, so Supabase works as
    ```
    DATABASE_URL=postgresql://postgres:My%2BPa%26ss@db.<project-ref>.supabase.co:5432/postgres?sslmode=require
    ```
-   * Project ref for this app: `yjwgdqcyttsspi` → host `db.yjwgdqcyttsspi.supabase.co`.
-   * If your network is IPv4-only, the direct host is not reachable — use **Connect → Session pooler** instead:
+   * Project ref for this app: `yjwgdqcypqlqqtwisspi` → host `db.yjwgdqcypqlqqtwisspi.supabase.co`.
+   * The direct host is IPv6-only. On IPv4 hosts (e.g. Vercel serverless) use the **Session pooler**:
      `postgresql://postgres.<project-ref>:<password>@aws-0-<region>.pooler.supabase.com:5432/postgres`
 3. Create the schema in Supabase:
    ```bash
