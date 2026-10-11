@@ -21,6 +21,18 @@ const usesSsl = (u: string) => {
 };
 const wantsVerify = (u: string) => /sslmode=(verify-ca|verify-full)/i.test(u);
 
+// node-postgres lets the connection string's sslmode override the `ssl` option, so strip it
+// and control TLS purely via the ssl option (which then wins).
+function withoutSslMode(u: string): string {
+  try {
+    const p = new URL(u);
+    p.searchParams.delete("sslmode");
+    return p.toString();
+  } catch {
+    return u.replace(/([?&])sslmode=[^&]*/i, "$1").replace(/[?&]$/, "");
+  }
+}
+
 const sslConfig = usesSsl(databaseUrl)
   ? { ssl: { rejectUnauthorized: process.env.PGSSL_NO_VERIFY === "1" ? false : wantsVerify(databaseUrl) } }
   : {};
@@ -32,7 +44,7 @@ const globalForDb = globalThis as typeof globalThis & {
 export const pool =
   globalForDb.__arenaNextJsPostgresqlPool ??
   new Pool({
-    connectionString: databaseUrl,
+    connectionString: withoutSslMode(databaseUrl),
     ...sslConfig,
     max: Number(process.env.PG_POOL_MAX ?? 10),
     connectionTimeoutMillis: 15_000,
