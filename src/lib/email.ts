@@ -12,8 +12,8 @@ export interface Attachment {
 
 async function transportSend(o: { to: string[]; cc?: string[]; subject: string; html: string; attachments?: Attachment[] }) {
   const es = await getEmailSettings();
-  if (!es.host) throw new Error("SMTP host is not configured (Settings → Email Configuration).");
-  if (!es.fromEmail) throw new Error("From email is not configured (Settings → Email Configuration).");
+    if (!es.host) throw new Error("SMTP host is not configured (Settings > Email Configuration).");
+    if (!es.fromEmail) throw new Error("From email is not configured (Settings > Email Configuration).");
   const pass = emailSecret();
   if (es.username && !pass) throw new Error("SMTP password / API key is not set. Add SMTP_PASSWORD to the environment secrets.");
   const t = nodemailer.createTransport({

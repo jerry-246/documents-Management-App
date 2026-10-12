@@ -6,6 +6,7 @@ import { todayISO, fmtDate } from "@/lib/time";
 import { calcExpiry, DOC_INFO, DOC_TYPES, NEXT_STEP_LABEL, NEXT_STEP_STATUSES, validateDocNumber, type DocType, type FieldError } from "@/lib/validation";
 import { fmtMoney } from "./format";
 import { ApiError, apiFetch, Btn, Card, Field, inputCls, inputErrCls, Loading, Modal, useConfig, useUI } from "./ui";
+import { IconAlertTriangle } from "./icons";
 
 interface Dup { id: number; invoiceNo: string; containerNo: string; im7No: string | null; im4No: string | null; recordDate: string; matchedOn: string[] }
 
@@ -165,7 +166,7 @@ export default function RecordForm({ mode, record, onSaved, onCancel }: { mode: 
         key={d}
         label={`${info.label} No.`}
         hint={<span>Required format: <code className="rounded bg-slate-100 px-1">{info.format}</code> — must start with “{info.prefix}”</span>}
-        error={e ? `❌ ${e.message}` : errFor(k, info.label)}
+        error={e ? e.message : errFor(k, info.label)}
       >
         <input className={`${inputCls} font-mono ${e || errFor(k, info.label) ? inputErrCls : ""}`} value={f[k]} onChange={(ev) => set(k, ev.target.value)} placeholder={`${info.prefix}…`} autoCapitalize="characters" spellCheck={false} maxLength={40} />
       </Field>
@@ -176,7 +177,9 @@ export default function RecordForm({ mode, record, onSaved, onCancel }: { mode: 
     <form onSubmit={(e) => { e.preventDefault(); void submit(); }} className="space-y-5">
       {shown.length > 0 && (
         <div className="rounded-xl border-2 border-red-300 bg-red-50 p-4 text-red-800">
-          <div className="font-bold">❌ ERROR</div>
+          <div className="flex items-center gap-1.5 font-bold">
+            <IconAlertTriangle size={16} /> Please fix the following:
+          </div>
           {shown.map((e, i) => (
             <div key={i} className="mt-1 text-sm">{e.message}</div>
           ))}
@@ -292,7 +295,7 @@ export default function RecordForm({ mode, record, onSaved, onCancel }: { mode: 
       )}
 
       {isAdmin && (
-        <Card title="🚚 Transport & charges (administrator only)">
+        <Card title="Transport & charges (administrator only)">
           <div className="grid gap-4 md:grid-cols-3">
             <Field label="Transporter"><input className={inputCls} value={f.transporter} onChange={(e) => set("transporter", e.target.value)} /></Field>
             <Field label="Transport cost"><input type="number" min={0} step="0.01" inputMode="decimal" className={inputCls} value={f.transportCost} onChange={(e) => set("transportCost", e.target.value)} /></Field>

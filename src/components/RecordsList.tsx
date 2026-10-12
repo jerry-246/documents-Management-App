@@ -6,6 +6,8 @@ import { fmtDate } from "@/lib/time";
 import { EXPIRY_LABEL } from "@/lib/validation";
 import { Badge, Btn, Card, Empty, ErrorBox, ExpiryBadge, ExportMenu, Field, inputCls, Loading, PageHeader, Pager, ProcBadge, qs, TableWrap, tdCls, thCls, useApi, useConfig, useDebounced, useSession } from "./ui";
 
+import { IconPlus } from "./icons";
+
 type Init = Record<string, string | undefined>;
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
@@ -51,7 +53,7 @@ export default function RecordsList({ initial }: { initial: Init }) {
             )}
             <ExportMenu type="records" params={{ ...params, withTransport: isAdmin && withT ? "1" : "" }} />
             {can("records.create") && (
-              <Link href="/records/new" className="rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700">＋ New Record</Link>
+              <Link href="/records/new" className="rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700"><IconPlus size={16} /> New Record</Link>
             )}
           </>
         }

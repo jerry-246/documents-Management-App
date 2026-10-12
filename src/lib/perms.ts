@@ -48,3 +48,9 @@ export const DEFAULT_PERMISSIONS: Record<Role, Permission[]> = {
 
 /** Permissions that can never be granted to staff/viewer, whatever the matrix says. */
 export const ADMIN_ONLY: Permission[] = ["transport.manage", "agents.manage"];
+
+/** Validate an arbitrary value into a clean per-user permission list (never includes admin-only rights). */
+export function normalizePermissions(input: unknown): Permission[] {
+  const chosen = new Set(Array.isArray(input) ? input.filter((p): p is string => typeof p === "string") : []);
+  return ALL_PERMISSIONS.filter((p) => chosen.has(p) && !ADMIN_ONLY.includes(p));
+}

@@ -3,6 +3,7 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import type { ExpiryRule, ExpiryStatus } from "@/lib/validation";
 import { EXPIRY_LABEL } from "@/lib/validation";
+import { IconAlertTriangle, IconCheck, IconChevronLeft, IconChevronRight, IconX } from "./icons";
 
 // ---------------- API ----------------
 export class ApiError extends Error {
@@ -169,12 +170,12 @@ export function UIProvider({ children }: { children: ReactNode }) {
         {toasts.map((t) => (
           <div
             key={t.id}
-            className={`rounded-lg px-4 py-3 text-sm font-medium shadow-lg ring-1 ${
+            className={`flex items-start gap-2 rounded-lg px-4 py-3 text-sm font-medium shadow-lg ring-1 ${
               t.type === "error" ? "bg-red-50 text-red-800 ring-red-200" : t.type === "info" ? "bg-blue-50 text-blue-800 ring-blue-200" : "bg-emerald-50 text-emerald-800 ring-emerald-200"
             }`}
           >
-            {t.type === "error" ? "❌ " : t.type === "success" ? "✓ " : ""}
-            {t.msg}
+            {t.type === "error" ? <IconAlertTriangle size={16} className="mt-0.5 shrink-0" /> : t.type === "success" ? <IconCheck size={16} className="mt-0.5 shrink-0" /> : null}
+            <span>{t.msg}</span>
           </div>
         ))}
       </div>
@@ -287,7 +288,7 @@ export function Modal({ title, children, onClose, small }: { title: string; chil
         <div className="mb-4 flex items-center justify-between">
           <h3 className="text-lg font-semibold text-slate-900">{title}</h3>
           <button onClick={onClose} className="rounded p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700" aria-label="Close">
-            ✕
+            <IconX size={18} />
           </button>
         </div>
         {children}
@@ -321,13 +322,13 @@ export function Pager({ page, pageSize, total, onPage }: { page: number; pageSiz
       </span>
       <div className="flex items-center gap-2">
         <Btn variant="secondary" small disabled={page <= 1} onClick={() => onPage(page - 1)}>
-          ← Prev
+          <IconChevronLeft size={14} /> Prev
         </Btn>
         <span>
           Page {page} / {pages}
         </span>
         <Btn variant="secondary" small disabled={page >= pages} onClick={() => onPage(page + 1)}>
-          Next →
+          Next <IconChevronRight size={14} />
         </Btn>
       </div>
     </div>

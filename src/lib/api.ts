@@ -53,7 +53,7 @@ export function route(perm: Permission | null, fn: (c: Ctx) => Promise<unknown>)
       actor.ip = clientIp(req);
       actor.ua = req.headers.get("user-agent") ?? undefined;
       rateLimit(`api:${actor.id}`, 600, 60_000);
-      if (perm && !(await can(actor.role, perm))) throw new HttpError(403, "You do not have permission to do this.");
+      if (perm && !can(actor, perm)) throw new HttpError(403, "You do not have permission to do this.");
       const params = (await context?.params) ?? {};
       const out = await fn({ req, actor, params });
       return out instanceof Response ? out : NextResponse.json(out ?? { ok: true });

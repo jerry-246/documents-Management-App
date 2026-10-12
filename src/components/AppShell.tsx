@@ -1,25 +1,47 @@
 "use client";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactElement, type ReactNode } from "react";
 import { apiFetch, SessionProvider, setToken, useApi } from "./ui";
+import {
+  IconAlertTriangle,
+  IconBell,
+  IconBuilding,
+  IconChart,
+  IconClipboardList,
+  IconClock,
+  IconDashboard,
+  IconList,
+  IconLock,
+  IconMail,
+  IconMenu,
+  IconMoveRight,
+  IconPackage,
+  IconPlus,
+  IconSearch,
+  IconSettings,
+  IconTruck,
+  IconUpload,
+  IconUsers,
+} from "./icons";
 
-const NAV: { href: string; label: string; icon: string; perm?: string }[] = [
-  { href: "/", label: "Dashboard", icon: "▦" },
-  { href: "/records/new", label: "New Record", icon: "＋", perm: "records.create" },
-  { href: "/records", label: "Records", icon: "☰", perm: "records.view" },
-  { href: "/move", label: "Move to Next Step", icon: "➜", perm: "records.move" },
-  { href: "/expiry", label: "Expiry Monitoring", icon: "⏳", perm: "expiry.view" },
-  { href: "/agents", label: "C&F Agents", icon: "🏢", perm: "agents.manage" },
-  { href: "/transport", label: "Transport & Payments", icon: "🚚", perm: "transport.manage" },
-  { href: "/reports", label: "Reports", icon: "📊", perm: "reports.view" },
-  { href: "/import", label: "Excel Import", icon: "⇪", perm: "records.import" },
-  { href: "/errors", label: "Error Log", icon: "⚠", perm: "errors.view" },
-  { href: "/emails", label: "Email History", icon: "✉", perm: "emails.view" },
-  { href: "/notifications", label: "Notifications", icon: "🔔" },
-  { href: "/audit", label: "Audit Log", icon: "🗒", perm: "audit.view" },
-  { href: "/users", label: "Users", icon: "👥", perm: "users.manage" },
-  { href: "/settings", label: "Settings", icon: "⚙", perm: "settings.manage" },
+type NavIcon = (p: { size?: number; className?: string }) => ReactElement;
+const NAV: { href: string; label: string; Icon: NavIcon; perm?: string }[] = [
+  { href: "/", label: "Dashboard", Icon: IconDashboard },
+  { href: "/records/new", label: "New Record", Icon: IconPlus, perm: "records.create" },
+  { href: "/records", label: "Records", Icon: IconList, perm: "records.view" },
+  { href: "/move", label: "Move to Next Step", Icon: IconMoveRight, perm: "records.move" },
+  { href: "/expiry", label: "Expiry Monitoring", Icon: IconClock, perm: "expiry.view" },
+  { href: "/agents", label: "C&F Agents", Icon: IconBuilding, perm: "agents.manage" },
+  { href: "/transport", label: "Transport & Payments", Icon: IconTruck, perm: "transport.manage" },
+  { href: "/reports", label: "Reports", Icon: IconChart, perm: "reports.view" },
+  { href: "/import", label: "Excel Import", Icon: IconUpload, perm: "records.import" },
+  { href: "/errors", label: "Error Log", Icon: IconAlertTriangle, perm: "errors.view" },
+  { href: "/emails", label: "Email History", Icon: IconMail, perm: "emails.view" },
+  { href: "/notifications", label: "Notifications", Icon: IconBell },
+  { href: "/audit", label: "Audit Log", Icon: IconClipboardList, perm: "audit.view" },
+  { href: "/users", label: "Users", Icon: IconUsers, perm: "users.manage" },
+  { href: "/settings", label: "Settings", Icon: IconSettings, perm: "settings.manage" },
 ];
 
 function Bell() {
@@ -31,8 +53,8 @@ function Bell() {
     return () => clearInterval(t);
   }, [data]);
   return (
-    <Link href="/notifications" className="relative rounded-lg p-2 text-lg hover:bg-slate-100" aria-label="Notifications">
-      🔔
+    <Link href="/notifications" className="relative rounded-lg p-2 text-slate-600 hover:bg-slate-100" aria-label="Notifications">
+      <IconBell size={20} />
       {n > 0 && <span className="absolute -right-0.5 -top-0.5 rounded-full bg-red-600 px-1.5 text-[10px] font-bold text-white">{n > 99 ? "99+" : n}</span>}
     </Link>
   );
@@ -63,10 +85,15 @@ export default function AppShell({
     <SessionProvider value={{ user, permissions }}>
       <div className="min-h-screen lg:flex">
         {open && <div className="fixed inset-0 z-30 bg-slate-900/50 lg:hidden" onClick={() => setOpen(false)} />}
-        <aside className={`fixed inset-y-0 left-0 z-40 w-64 transform overflow-y-auto bg-slate-900 text-slate-200 transition lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 ${open ? "translate-x-0" : "-translate-x-full"}`}>
-          <div className="px-5 py-5">
-            <div className="text-lg font-bold text-white">📦 Container Tracker</div>
-            <div className="text-xs text-slate-400">Documents · Expiry · Workflow</div>
+        <aside className={`fixed inset-y-0 left-0 z-40 w-64 transform overflow-y-auto bg-slate-900 transition lg:static lg:translate-x-0 ${open ? "translate-x-0" : "-translate-x-full"}`}>
+          <div className="flex items-center gap-2.5 px-5 py-5">
+            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600 text-white">
+              <IconPackage size={20} />
+            </span>
+            <span>
+              <span className="block text-sm font-bold leading-tight text-white">Container Tracker</span>
+              <span className="block text-xs text-slate-400">Documents · Expiry · Workflow</span>
+            </span>
           </div>
           <nav className="space-y-0.5 px-3 pb-6">
             {items.map((n) => (
@@ -75,7 +102,9 @@ export default function AppShell({
                 href={n.href}
                 className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition ${active(n.href) ? "bg-blue-600 text-white" : "text-slate-300 hover:bg-slate-800"}`}
               >
-                <span className="w-5 text-center">{n.icon}</span>
+                <span className="flex w-5 justify-center">
+                  <n.Icon size={18} />
+                </span>
                 {n.label}
               </Link>
             ))}
@@ -83,22 +112,23 @@ export default function AppShell({
         </aside>
         <div className="min-w-0 flex-1">
           <header className="sticky top-0 z-20 flex items-center gap-3 border-b border-slate-200 bg-white/95 px-4 py-2.5 backdrop-blur">
-            <button className="rounded-lg p-2 text-xl hover:bg-slate-100 lg:hidden" onClick={() => setOpen(true)} aria-label="Menu">
-              ☰
+            <button className="rounded-lg p-2 text-slate-600 hover:bg-slate-100 lg:hidden" onClick={() => setOpen(true)} aria-label="Menu">
+              <IconMenu size={20} />
             </button>
             {permissions.includes("records.view") && (
               <form
-                className="flex-1 sm:max-w-md"
+                className="relative flex-1 sm:max-w-md"
                 onSubmit={(e) => {
                   e.preventDefault();
                   router.push(`/records?q=${encodeURIComponent(q)}`);
                 }}
               >
+                <IconSearch size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                 <input
                   value={q}
                   onChange={(e) => setQ(e.target.value)}
                   placeholder="Search invoice, container, IM7, VA, IM4, Exit, date, stage…"
-                  className="w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm outline-none focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-200"
+                  className="w-full rounded-lg border border-slate-300 bg-slate-50 py-2 pl-9 pr-3 text-sm outline-none focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-200"
                 />
               </form>
             )}
@@ -123,9 +153,11 @@ export default function AppShell({
           <main className="mx-auto max-w-[1400px] p-4 sm:p-6">
             {denied ? (
               <div className="mx-auto mt-16 max-w-md rounded-xl border border-red-200 bg-red-50 p-6 text-center">
-                <div className="text-3xl">🔒</div>
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-100 text-red-700">
+                  <IconLock size={24} />
+                </div>
                 <h1 className="mt-2 text-lg font-bold text-red-800">Access denied</h1>
-                <p className="mt-1 text-sm text-red-700">Your role does not have permission to open this page.</p>
+                <p className="mt-1 text-sm text-red-700">You do not have permission to open this page.</p>
               </div>
             ) : (
               children

@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { csvList } from "@/components/format";
 import { ApiError, apiFetch, Badge, Btn, Card, ErrorBox, Field, inputCls, invalidateConfig, Loading, PageHeader, TableWrap, Tabs, tdCls, thCls, Toggle, useApi, useUI } from "@/components/ui";
 import { ADMIN_ONLY, PERMISSIONS, type Permission } from "@/lib/perms";
+import { IconAlertTriangle, IconArrowDown, IconArrowUp, IconPlus } from "@/components/icons";
 import type { EmailSettings } from "@/lib/settings";
 import type { ExpiryRule } from "@/lib/validation";
 
@@ -34,8 +35,9 @@ function ExpiryPanel() {
   );
   return (
     <Card title="Expiry rule settings">
-      <div className="mb-4 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
-        ⚠ Changing expiry rules affects new calculations. Existing records retain their original validity period and expiry date.
+      <div className="mb-4 flex items-start gap-2 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
+        <IconAlertTriangle size={16} className="mt-0.5 shrink-0" />
+        <span>Changing expiry rules affects new calculations. Existing records retain their original validity period and expiry date.</span>
       </div>
       <TableWrap>
         <table className="w-full min-w-[720px]">
@@ -198,13 +200,19 @@ function WorkflowPanel() {
             <input className={`${inputCls} min-w-40 flex-1`} value={s.label} onChange={(e) => setSt((x) => x.map((y, j) => (j === i ? { ...y, label: e.target.value } : y)))} />
             <label className="flex items-center gap-1 text-sm"><input type="checkbox" checked={s.active} onChange={(e) => setSt((x) => x.map((y, j) => (j === i ? { ...y, active: e.target.checked } : y)))} /> Active</label>
             <label className="flex items-center gap-1 text-sm"><input type="checkbox" checked={s.isFinal} onChange={(e) => setSt((x) => x.map((y, j) => (j === i ? { ...y, isFinal: e.target.checked } : y)))} /> Final</label>
-            <Btn small variant="ghost" onClick={() => move(i, -1)}>↑</Btn>
-            <Btn small variant="ghost" onClick={() => move(i, 1)}>↓</Btn>
+            <Btn small variant="ghost" onClick={() => move(i, -1)} aria-label="Move up">
+              <IconArrowUp size={14} />
+            </Btn>
+            <Btn small variant="ghost" onClick={() => move(i, 1)} aria-label="Move down">
+              <IconArrowDown size={14} />
+            </Btn>
           </div>
         ))}
       </div>
       <div className="mt-4 flex justify-between">
-        <Btn variant="secondary" onClick={() => setSt((s) => [...s, { label: "", active: true, isFinal: false }])}>＋ Add stage</Btn>
+        <Btn variant="secondary" onClick={() => setSt((s) => [...s, { label: "", active: true, isFinal: false }])}>
+          <IconPlus size={15} /> Add stage
+        </Btn>
         <Btn onClick={save}>Save workflow</Btn>
       </div>
     </Card>
@@ -222,10 +230,10 @@ function ValidationPanel() {
   if (!data) return <Loading />;
   return (
     <Card title="Document number validation">
-      <ul className="mb-4 space-y-1 text-sm text-slate-700">
-        <li>• <b>IM7</b> numbers must start with <b>S</b></li>
-        <li>• <b>IM4</b> numbers must start with <b>C</b></li>
-        <li>• <b>Exit</b> numbers must start with <b>X</b></li>
+      <ul className="mb-4 list-inside list-disc space-y-1 text-sm text-slate-700">
+        <li><b>IM7</b> numbers must start with <b>S</b></li>
+        <li><b>IM4</b> numbers must start with <b>C</b></li>
+        <li><b>Exit</b> numbers must start with <b>X</b></li>
       </ul>
       <p className="mb-3 text-sm text-slate-500">Enforced in the form, the API, record edits and Excel imports. Failures are written to the Error Log.</p>
       <div className="max-w-md"><Toggle label="Case-sensitive prefix (reject lowercase c / x)" checked={data.caseSensitive} onChange={set} /></div>

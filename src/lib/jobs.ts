@@ -101,7 +101,7 @@ ${APP_URL() ? `<p><a href="${APP_URL()}">Open the Container Tracking System</a><
   await audit(db, { actor, action: "report_generated", newValue: `${kind} report ${from}..${to}: ${res.ok ? "sent" : "failed"}`, reason: res.error ?? null });
   await db.insert(notifications).values({
     kind: "report",
-    message: res.ok ? `✓ ${KIND_LABEL[kind]} report successfully sent.` : `❌ ${KIND_LABEL[kind]} report failed to send: ${res.error}`,
+    message: res.ok ? `${KIND_LABEL[kind]} report successfully sent.` : `${KIND_LABEL[kind]} report failed to send: ${res.error}`,
     link: "/emails",
   });
   return { ok: res.ok, error: res.error, skipped: false };
@@ -155,7 +155,7 @@ export async function runExpiryAlerts(): Promise<{ inApp: number; emails: number
           : `${label} for Container ${v.containerNo} will expire in ${dv.daysRemaining} day${dv.daysRemaining === 1 ? "" : "s"} (${fmtDate(dv.expiryDate)}).`;
       const ins = await db
         .insert(notifications)
-        .values({ kind: "expiry", message: `${band === "expired" ? "⚠" : "🔔"} ${text}`, link: `/records/${v.id}`, dedupeKey: key })
+        .values({ kind: "expiry", message: `${band === "expired" ? "Expired" : "Expiring"} ${text}`, link: `/records/${v.id}`, dedupeKey: key })
         .onConflictDoNothing()
         .returning({ id: notifications.id });
       inApp += ins.length;

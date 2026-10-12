@@ -3,6 +3,7 @@ import { useState } from "react";
 import type { RecordView } from "@/lib/records";
 import { DOC_INFO, DOC_TYPES, NEXT_STEP_LABEL, NEXT_STEP_STATUSES, docStopped } from "@/lib/validation";
 import { ApiError, apiFetch, Btn, Field, inputCls, Loading, useConfig, useUI } from "./ui";
+import { IconPauseCircle, IconPlayCircle } from "./icons";
 
 export default function MovePanel({ record, onMoved }: { record: RecordView; onMoved: () => void }) {
   const cfg = useConfig();
@@ -81,8 +82,16 @@ export default function MovePanel({ record, onMoved }: { record: RecordView; onM
           </Field>
           {(stopping.length > 0 || resuming.length > 0) && (
             <div className="rounded-lg border border-blue-200 bg-blue-50 p-3 text-sm text-blue-900 md:col-span-2">
-              {stopping.length > 0 && <div>⏹ The expiry countdown for <b>{stopping.map((d) => DOC_INFO[d].label).join(", ")}</b> will stop — it will no longer be counted or alerted.</div>}
-              {resuming.length > 0 && <div>▶ The expiry countdown for <b>{resuming.map((d) => DOC_INFO[d].label).join(", ")}</b> will resume (moving back).</div>}
+              {stopping.length > 0 && (
+                <div className="flex items-start gap-1.5">
+                  <IconPauseCircle size={15} className="mt-0.5 shrink-0" /> <span>The expiry countdown for <b>{stopping.map((d) => DOC_INFO[d].label).join(", ")}</b> will stop — it will no longer be counted or alerted.</span>
+                </div>
+              )}
+              {resuming.length > 0 && (
+                <div className="flex items-start gap-1.5">
+                  <IconPlayCircle size={15} className="mt-0.5 shrink-0" /> <span>The expiry countdown for <b>{resuming.map((d) => DOC_INFO[d].label).join(", ")}</b> will resume (moving back).</span>
+                </div>
+              )}
             </div>
           )}
           <div className="md:col-span-2">

@@ -1,8 +1,9 @@
+import { randomBytes } from "crypto";
 import { db } from "@/db";
 import { expiryRules, systemSettings, workflowStages } from "@/db/schema";
 import { asc, eq } from "drizzle-orm";
 import { DOC_TYPES, type DocType, type ExpiryRule } from "./validation";
-import { ADMIN_ONLY, DEFAULT_PERMISSIONS, type Permission, type Role } from "./perms";
+import { ADMIN_ONLY, ALL_PERMISSIONS, DEFAULT_PERMISSIONS, type Permission, type Role } from "./perms";
 
 const cache = new Map<string, { at: number; v: unknown }>();
 const TTL = 10_000;
@@ -162,6 +163,51 @@ export async function getPermissionMatrix(): Promise<Record<Role, Permission[]>>
 export async function permissionsFor(role: Role): Promise<Permission[]> {
   if (role === "admin") return DEFAULT_PERMISSIONS.admin;
   return ((await getPermissionMatrix())[role] ?? []).filter((p) => !ADMIN_ONLY.includes(p));
+}
+
+/**
+ * Effective permissions for a specific user. A per-user list (assigned by an administrator) overrides the
+ * role defaults; `null`/`undefined` means "use the role defaults". Administrators always get everything and
+ * administrator-only permissions can never be granted to a non-administrator.
+ */
+export async function effectivePermissions(role: Role, custom?: string[] | null): Promise<Permission[]> {
+  if (role === "admin") return DEFAULT_PERMISSIONS.admin;
+  if (Array.isArray(custom)) {
+    return custom.filter((p): p is Permission => (ALL_PERMISSIONS as string[]).includes(p) && !ADMIN_ONLY.includes(p as Permission));
+  }
+  return permissionsFor(role);
+}
+
+/**
+ * The session signing secret. Prefers the SESSION_SECRET environment variable; otherwise stores a generated
+ * secret in the database once and always re-reads the canonical value so every serverless instance agrees on
+ * the same secret (an unstable secret is what caused sessions to drop on every refresh).
+ */
+export async function getSessionSecret(): Promise<string> {
+  const env = process.env.SESSION_SECRET?.trim();
+  if (env) return env;
+  const read = async (): Promise<string | null> => {
+    const [row] = await db.select().from(systemSettings).where(eq(systemSettings.settingName, "session_secret")).limit(1);
+    if (!row) return null;
+    try {
+      return JSON.parse(row.settingValue) as string;
+    } catch {
+      return row.settingValue;
+    }
+  };
+  const existing = await read();
+  if (existing) return existing;
+  const generated = randomBytes(32).toString("hex");
+  await db
+    .insert(systemSettings)
+    .values({ settingName: "session_secret", settingValue: JSON.stringify(generated), updatedBy: null })
+    .onConflictDoNothing();
+  return (await read()) ?? generated;
+}
+
+/** Resolve the permissions a given user actually has (per-user override → role default). */
+export async function effectivePermissionsForUser(user: { role: Role; permissions?: string[] | null }): Promise<Permission[]> {
+  return effectivePermissions(user.role, user.permissions ?? null);
 }
 
 export async function getCurrency(): Promise<string> {

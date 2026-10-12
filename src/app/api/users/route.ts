@@ -5,7 +5,8 @@ import { users } from "@/db/schema";
 import { audit } from "@/lib/audit";
 import { HttpError, readJson, route, str } from "@/lib/api";
 import { can } from "@/lib/auth";
-import { ROLES } from "@/lib/perms";
+import { ROLES, normalizePermissions, type Role } from "@/lib/perms";
+import { effectivePermissions } from "@/lib/settings";
 
 export const dynamic = "force-dynamic";
 
@@ -15,12 +16,23 @@ export const GET = route(null, async ({ req, actor }) => {
     const rows = await db.select({ id: users.id, name: users.name }).from(users).orderBy(asc(users.name));
     return { rows };
   }
-  if (!(await can(actor.role, "users.manage"))) throw new HttpError(403, "You do not have permission to do this.");
+  if (!can(actor, "users.manage")) throw new HttpError(403, "You do not have permission to do this.");
   const rows = await db
-    .select({ id: users.id, name: users.name, email: users.email, position: users.position, role: users.role, status: users.status, createdAt: users.createdAt })
+    .select({
+      id: users.id,
+      name: users.name,
+      email: users.email,
+      position: users.position,
+      role: users.role,
+      status: users.status,
+      permissions: users.permissions,
+      securityQuestion: users.securityQuestion,
+      createdAt: users.createdAt,
+    })
     .from(users)
     .orderBy(asc(users.name));
-  return { rows };
+  const withEffective = await Promise.all(rows.map(async (r) => ({ ...r, effective: await effectivePermissions(r.role as Role, r.permissions) })));
+  return { rows: withEffective };
 });
 
 export const POST = route("users.manage", async ({ req, actor }) => {
@@ -37,7 +49,25 @@ export const POST = route("users.manage", async ({ req, actor }) => {
   if (!(ROLES as string[]).includes(role)) throw new HttpError(400, "Invalid role.");
   const [dup] = await db.select({ id: users.id }).from(users).where(sql`lower(${users.email}) = ${email}`).limit(1);
   if (dup) throw new HttpError(409, "A user with this email already exists.");
-  const [u] = await db.insert(users).values({ name, email, position, role, passwordHash: bcrypt.hashSync(password, 10) }).returning({ id: users.id });
-  await audit(db, { actor, action: "user_created", newValue: { name, email, position, role }, recordId: null });
+
+  const permissions = role === "admin" ? null : Array.isArray(b.permissions) ? normalizePermissions(b.permissions) : null;
+  const question = str(b.securityQuestion).slice(0, 200);
+  const answer = typeof b.securityAnswer === "string" ? b.securityAnswer.trim() : "";
+  const securityAnswerHash = question && answer ? bcrypt.hashSync(answer.toLowerCase(), 10) : null;
+
+  const [u] = await db
+    .insert(users)
+    .values({
+      name,
+      email,
+      position,
+      role,
+      passwordHash: bcrypt.hashSync(password, 10),
+      permissions,
+      securityQuestion: question || null,
+      securityAnswerHash,
+    })
+    .returning({ id: users.id });
+  await audit(db, { actor, action: "user_created", newValue: { name, email, position, role, permissions }, recordId: null });
   return { id: u.id };
 });

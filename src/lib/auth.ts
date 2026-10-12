@@ -1,10 +1,9 @@
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
-import { randomBytes } from "crypto";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { users } from "@/db/schema";
-import { getSetting, setSetting, permissionsFor } from "./settings";
+import { getSessionSecret, effectivePermissionsForUser } from "./settings";
 import type { Actor } from "./audit";
 import type { Permission, Role } from "./perms";
 
@@ -14,15 +13,7 @@ const MAX_AGE = 60 * 60 * 12;
 let secretCache: Uint8Array | null = null;
 async function secret(): Promise<Uint8Array> {
   if (secretCache) return secretCache;
-  let s = process.env.SESSION_SECRET;
-  if (!s) {
-    s = (await getSetting<string | null>("session_secret", null)) ?? undefined;
-    if (!s) {
-      s = randomBytes(32).toString("hex");
-      await setSetting("session_secret", s, null);
-    }
-  }
-  secretCache = new TextEncoder().encode(s);
+  secretCache = new TextEncoder().encode(await getSessionSecret());
   return secretCache;
 }
 
@@ -64,7 +55,8 @@ export async function userFromToken(token: string | undefined): Promise<Actor | 
       .where(eq(users.id, Number(payload.uid)))
       .limit(1);
     if (!u || u.status !== "active") return null;
-    return { id: u.id, name: u.name, email: u.email, role: u.role as Role, position: u.position };
+    const permissions = await effectivePermissionsForUser({ role: u.role as Role, permissions: u.permissions });
+    return { id: u.id, name: u.name, email: u.email, role: u.role as Role, position: u.position, permissions };
   } catch {
     return null;
   }
@@ -84,6 +76,7 @@ export async function getSessionUser(): Promise<Actor | null> {
   return userFromToken(jar.get(COOKIE)?.value);
 }
 
-export async function can(role: Role, perm: Permission): Promise<boolean> {
-  return (await permissionsFor(role)).includes(perm);
+/** True when the signed-in user (with their per-user permission overrides) holds the permission. */
+export function can(actor: Actor, perm: Permission): boolean {
+  return !!actor.permissions?.includes(perm);
 }

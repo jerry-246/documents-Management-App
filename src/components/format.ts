@@ -47,12 +47,12 @@ export const ACTION_LABEL: Record<string, string> = {
 };
 
 export function actionIcon(a: string): string {
-  if (a.startsWith("record_") && a !== "record_edited") return a === "record_archived" || a === "record_deleted" ? "🗄" : "🆕";
-  if (a === "record_edited" || a === "expiry_recalculated") return "✏️";
-  if (a === "stage_moved") return "➜";
-  if (a === "validation_failure" || a === "login_failed") return "❌";
-  if (a.startsWith("report") || a.startsWith("email")) return "✉";
-  return "•";
+  if (a.startsWith("record_") && a !== "record_edited") return a === "record_archived" || a === "record_deleted" ? "archive" : "new";
+  if (a === "record_edited" || a === "expiry_recalculated") return "edit";
+  if (a === "stage_moved") return "move";
+  if (a === "validation_failure" || a === "login_failed") return "error";
+  if (a.startsWith("report") || a.startsWith("email")) return "mail";
+  return "info";
 }
 
 export function trunc(s: string | null | undefined, n = 90): string {

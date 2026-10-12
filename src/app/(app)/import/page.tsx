@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { IconCheck, IconX } from "@/components/icons";
 import { fmtDate } from "@/lib/time";
 import type { FieldError } from "@/lib/validation";
 import { ApiError, apiFetch, Badge, Btn, Card, Empty, PageHeader, inputCls, TableWrap, tdCls, thCls, useUI } from "@/components/ui";
@@ -78,7 +79,7 @@ export default function ImportPage() {
       <PageHeader title="Excel Import" subtitle="Upload .xlsx / .xls / .csv with columns: Invoice No., Container No., Company Name, C&F Agent (must match an active agent), IM7 No., VA, IM4 No., Exit No., Record Date" />
       <Card title="1. Upload file">
         <input type="file" accept=".xlsx,.xls,.csv" disabled={busy} onChange={(e) => e.target.files?.[0] && upload(e.target.files[0])} className={inputCls} />
-        {done && <div className="mt-3 rounded-lg bg-emerald-50 p-3 text-sm font-medium text-emerald-800">✓ {done}</div>}
+        {done && <div className="mt-3 rounded-lg bg-emerald-50 p-3 text-sm font-medium text-emerald-800"><IconCheck size={15} className="inline" /> {done}</div>}
       </Card>
 
       {prev && (
@@ -108,9 +109,9 @@ export default function ImportPage() {
                         <td className={`${tdCls} text-xs`}>
                           {bad ? <span className="font-medium text-red-700">{res.errors.map((e) => e.message).join(" ")}</span>
                             : dup ? <span className="text-amber-700">Possible duplicate{res.duplicates[0] ? ` of #${res.duplicates[0].id} (${res.duplicates[0].matchedOn.join(", ")})` : " within file"}</span>
-                            : <span className="text-emerald-700">✓ Valid</span>}
+                            : <span className="text-emerald-700"><IconCheck size={14} className="inline" /> Valid</span>}
                         </td>
-                        <td className={tdCls}><button className="text-slate-400 hover:text-red-600" onClick={() => remove(i)} aria-label="Remove row">✕</button></td>
+                        <td className={tdCls}><button className="text-slate-400 hover:text-red-600" onClick={() => remove(i)} aria-label="Remove row"><IconX size={14} /></button></td>
                       </tr>
                     );
                   })}
@@ -130,7 +131,7 @@ export default function ImportPage() {
           </Card>
         </>
       )}
-      {!prev && !done && <div className="mt-5"><Empty>Choose a file to begin. Every row is validated (IM7 → S, IM4 → C, Exit → X), checked for duplicates, and expiry dates are calculated before anything is saved.</Empty></div>}
+      {!prev && !done && <div className="mt-5"><Empty>Choose a file to begin. Every row is validated (IM7 -&gt; S, IM4 -&gt; C, Exit -&gt; X), checked for duplicates, and expiry dates are calculated before anything is saved.</Empty></div>}
     </>
   );
 }

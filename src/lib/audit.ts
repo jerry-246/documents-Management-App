@@ -12,6 +12,8 @@ export interface Actor {
   email: string;
   role: "admin" | "staff" | "viewer";
   position?: string | null;
+  /** Effective permissions for this specific user (per-user overrides already applied). */
+  permissions?: string[];
   ip?: string;
   ua?: string;
 }
@@ -76,7 +78,7 @@ export async function logValidationErrors(
   });
   await db.insert(notifications).values({
     kind: "error",
-    message: `❌ Validation failed (${errors.map((e) => e.label).join(", ")}) — entered by ${actor?.name ?? "unknown"}${
+    message: `Validation failed (${errors.map((e) => e.label).join(", ")}) — entered by ${actor?.name ?? "unknown"}${
       ctx.containerNo ? ` for container ${ctx.containerNo}` : ""
     }.`,
     link: "/errors",

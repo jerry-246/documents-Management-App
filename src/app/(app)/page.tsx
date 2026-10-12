@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Badge, Card, Empty, ErrorBox, ExpiryBadge, ExportMenu, Loading, PageHeader, Stat, TableWrap, tdCls, thCls, useApi } from "@/components/ui";
 import { fmtDate } from "@/lib/time";
 import type { ExpiryRow } from "@/lib/records";
+import { IconArrowRight, IconMoveRight } from "@/components/icons";
 
 interface Dash {
   cards: Record<string, number>;
@@ -63,7 +64,11 @@ export default function Dashboard() {
                 <div className="text-xs font-semibold uppercase tracking-wide text-slate-600">{s.label}</div>
                 <div className={`text-2xl font-bold ${s.isFinal ? "text-emerald-700" : "text-blue-700"}`}>{s.count}</div>
               </Link>
-              {i < data.workflow.length - 1 && <span className="hidden text-slate-300 md:block">➜</span>}
+              {i < data.workflow.length - 1 && (
+                <span className="hidden text-slate-300 md:block">
+                  <IconMoveRight size={18} />
+                </span>
+              )}
             </div>
           ))}
         </div>
@@ -82,7 +87,9 @@ export default function Dashboard() {
               <option value="">All documents</option><option value="IM7">IM7</option><option value="IM4">IM4</option><option value="EXIT">Exit</option>
             </select>
             <ExportMenu type="expiry" params={{ company, doc, status: status === "all" ? "" : status }} />
-            <Link href="/expiry" className="text-xs font-semibold text-blue-600">Full monitor →</Link>
+            <Link href="/expiry" className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600">
+              Full monitor <IconArrowRight size={13} />
+            </Link>
           </>
         }
       >

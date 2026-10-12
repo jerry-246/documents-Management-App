@@ -33,23 +33,26 @@ async function run() {
           "Set them in .env and restart to create the first administrator.",
       );
     } else {
-      await db.insert(users).values({
-        name: "Administrator",
-        email,
-        position: "Administrator",
-        role: "admin",
-        passwordHash: bcrypt.hashSync(password, 10),
-      });
+      await db
+        .insert(users)
+        .values({
+          name: "Administrator",
+          email,
+          position: "Administrator",
+          role: "admin",
+          passwordHash: bcrypt.hashSync(password, 10),
+        })
+        .onConflictDoNothing();
     }
   }
 
   // Default expiry rules (functional configuration, editable in Settings → Expiry Rules).
   const [r] = await db.select({ n: count() }).from(expiryRules);
-  if (r.n === 0) await db.insert(expiryRules).values(DOC_TYPES.map((d) => ({ documentType: d, ...DEFAULT_RULES[d] })));
+  if (r.n === 0) await db.insert(expiryRules).values(DOC_TYPES.map((d) => ({ documentType: d, ...DEFAULT_RULES[d] }))).onConflictDoNothing();
 
   // Default workflow stages (functional configuration, editable in Settings → Workflow).
   const [s] = await db.select({ n: count() }).from(workflowStages);
-  if (s.n === 0) await db.insert(workflowStages).values(DEFAULT_STAGES);
+  if (s.n === 0) await db.insert(workflowStages).values(DEFAULT_STAGES).onConflictDoNothing();
 
   // Mark setup as done once (kept for backward compatibility; no data is seeded).
   if (!(await getSetting<boolean>("initialized", false))) await setSetting("initialized", true, null);

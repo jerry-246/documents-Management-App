@@ -7,6 +7,7 @@ import { fmtMoney } from "@/components/format";
 import { fmtDate } from "@/lib/time";
 import { PAY_LABEL, PAY_TONE, PAYMENT_METHODS, type PaymentRow, type PayStatus } from "@/lib/payments-shared";
 import { apiFetch, ApiError, Badge, Btn, Card, Empty, ErrorBox, ExportMenu, Field, inputCls, Loading, PageHeader, qs, Stat, TableWrap, Tabs, tdCls, thCls, useApi, useDebounced, useUI } from "@/components/ui";
+import { IconPlus } from "@/components/icons";
 
 interface ChargeRow {
   id: number; recordDate: string; invoiceNo: string; containerNo: string; companyName: string | null; stageLabel: string; archived: boolean;
@@ -132,7 +133,9 @@ function PaymentsTab({ onPay, refreshKey, initialTransporter }: { onPay: (p: Pay
         actions={
           <>
             <ExportMenu type="payments" params={{ ...p, _r: undefined }} />
-            <Btn variant="success" onClick={() => onPay({ transporter: f.transporter || undefined }, cur, data?.transporters ?? [])}>＋ Record payment</Btn>
+            <Btn variant="success" onClick={() => onPay({ transporter: f.transporter || undefined }, cur, data?.transporters ?? [])}>
+                <IconPlus size={16} /> Record payment
+              </Btn>
           </>
         }
       >
@@ -267,7 +270,7 @@ export default function TransportPage() {
           </div>
         }
       />
-      <Tabs value={tab} onChange={setTab} tabs={[["charges", "🚚 Charges"], ["payments", "💳 Payments"], ["balances", "⚖ Transporter balances"]]} />
+      <Tabs value={tab} onChange={setTab} tabs={[["charges", "Charges"], ["payments", "Payments"], ["balances", "Transporter balances"]]} />
       {tab === "charges" && <ChargesTab onPay={openPay} refreshKey={refresh} />}
       {tab === "payments" && <PaymentsTab onPay={openPay} refreshKey={refresh} initialTransporter={viewT} />}
       {tab === "balances" && <BalancesTab onPay={openPay} refreshKey={refresh} onView={(t) => { setViewT(t); setTab("payments"); }} />}

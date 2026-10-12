@@ -22,7 +22,7 @@ export default function ExpiryPage() {
 
   return (
     <>
-      <PageHeader title="Expiry Monitoring" subtitle="Documents ordered by urgency. Status thresholds come from Settings → Expiry Rules." actions={<ExportMenu type="expiry" params={p} />} />
+      <PageHeader title="Expiry Monitoring" subtitle="Documents ordered by urgency. Status thresholds come from Settings &gt; Expiry Rules." actions={<ExportMenu type="expiry" params={p} />} />
       <Card className="mb-4">
         <div className="mb-3 flex flex-wrap gap-2">
           {PRESETS.map(([k, l]) => (

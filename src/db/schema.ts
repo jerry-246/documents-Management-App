@@ -23,6 +23,11 @@ export const users = pgTable("users", {
   position: text("position"),
   role: varchar("role", { length: 20 }).notNull().default("staff"),
   status: varchar("status", { length: 20 }).notNull().default("active"),
+  // Per-user permission overrides chosen by an administrator. null = inherit the role's permissions.
+  permissions: jsonb("permissions").$type<string[] | null>(),
+  // Self-service password reset (set by the user or an administrator).
+  securityQuestion: text("security_question"),
+  securityAnswerHash: text("security_answer_hash"),
   createdAt: ts("created_at").notNull().defaultNow(),
   updatedAt: ts("updated_at").notNull().defaultNow(),
 });

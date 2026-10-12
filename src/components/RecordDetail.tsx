@@ -14,6 +14,7 @@ import { PaymentModal, PaymentsTable } from "./Payments";
 import { PAY_LABEL, PAY_TONE, payStatus, r2, type PaymentRow } from "@/lib/payments-shared";
 import { fmtMoney } from "./format";
 import { ApiError, apiFetch, Badge, Btn, Card, Empty, ErrorBox, ExpiryBadge, Field, inputCls, Loading, Modal, ProcBadge, TableWrap, tdCls, thCls, useApi, useSession, useUI } from "./ui";
+import { IconAlertTriangle, IconArchive, IconArrowLeft, IconCreditCard, IconMail, IconPauseCircle, IconPencil, IconPlus, IconTruck } from "./icons";
 
 interface Detail {
   agent: { id: number | null; name: string; status: string } | null;
@@ -78,7 +79,9 @@ export default function RecordDetail({ id }: { id: number }) {
     <>
       <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
         <div>
-          <Link href="/records" className="text-xs font-semibold text-blue-600">← All records</Link>
+          <Link href="/records" className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600">
+            <IconArrowLeft size={13} /> All records
+          </Link>
           <h1 className="mt-1 text-2xl font-bold text-slate-900">Invoice {r.invoiceNo}</h1>
           <p className="font-mono text-sm text-slate-600">Container {r.containerNo}</p>
           {r.companyName && <p className="text-sm font-medium text-slate-700">{r.companyName}</p>}
@@ -90,8 +93,21 @@ export default function RecordDetail({ id }: { id: number }) {
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
-          {can("records.edit") && !r.archived && <Btn variant="secondary" onClick={() => setEditing(true)}>✏️ Edit</Btn>}
-          {can("records.archive") && (r.archived ? <Btn variant="secondary" onClick={() => setDlg("archive")}>Restore</Btn> : <Btn variant="secondary" onClick={() => setDlg("archive")}>🗄 Archive</Btn>)}
+          {can("records.edit") && !r.archived && (
+            <Btn variant="secondary" onClick={() => setEditing(true)}>
+              <IconPencil size={15} /> Edit
+            </Btn>
+          )}
+          {can("records.archive") &&
+            (r.archived ? (
+              <Btn variant="secondary" onClick={() => setDlg("archive")}>
+                <IconArchive size={15} /> Restore
+              </Btn>
+            ) : (
+              <Btn variant="secondary" onClick={() => setDlg("archive")}>
+                <IconArchive size={15} /> Archive
+              </Btn>
+            ))}
           {can("records.delete") && r.archived && <Btn variant="danger" onClick={() => setDlg("delete")}>Delete permanently</Btn>}
         </div>
       </div>
@@ -149,7 +165,11 @@ export default function RecordDetail({ id }: { id: number }) {
                     <td className={tdCls}>
                       {dv.stopped ? (
                         <span>
-                          <Badge tone="slate">⏹ Countdown stopped</Badge>
+                          <Badge tone="slate">
+                            <span className="inline-flex items-center gap-1">
+                              <IconPauseCircle size={12} /> Countdown stopped
+                            </span>
+                          </Badge>
                           {data.stops[d] && <div className="mt-0.5 text-[11px] text-slate-500">Moved to {data.stops[d]!.toLabel} on {fmtDateTime(data.stops[d]!.at)}{data.stops[d]!.by ? ` by ${data.stops[d]!.by}` : ""}</div>}
                         </span>
                       ) : (
@@ -173,13 +193,13 @@ export default function RecordDetail({ id }: { id: number }) {
       {can("transport.manage") && r.transport && (
         <Card
           className="mt-5 border-purple-200"
-          title={<span>🚚 Transport &amp; charges <Badge tone="purple">Administrator only</Badge></span>}
-          actions={<Btn small variant="secondary" onClick={() => setEditT(true)}>✏️ Edit / delete</Btn>}
+          title={<span className="inline-flex items-center gap-2"><IconTruck size={16} /> Transport &amp; charges <Badge tone="purple">Administrator only</Badge></span>}
+          actions={<Btn small variant="secondary" onClick={() => setEditT(true)}><IconPencil size={14} /> Edit / delete</Btn>}
         >
           {!r.transport.transporter && r.transport.transportCost == null && r.transport.extraCharges == null ? (
             <div className="flex items-center justify-between gap-3 text-sm text-slate-500">
               <span>No transport details recorded.</span>
-              <Btn small onClick={() => setEditT(true)}>＋ Add transport details</Btn>
+              <Btn small onClick={() => setEditT(true)}><IconPlus size={15} /> Add transport details</Btn>
             </div>
           ) : (
             <div className="grid gap-x-8 md:grid-cols-2">
@@ -203,8 +223,8 @@ export default function RecordDetail({ id }: { id: number }) {
       {can("transport.manage") && r.transport && (r.transport.transporter || (data.payments?.length ?? 0) > 0) && (
         <Card
           className="mt-5 border-emerald-200"
-          title={<span>💳 Payments to transporter <Badge tone="purple">Administrator only</Badge></span>}
-          actions={r.transport.transporter ? <Btn small variant="success" onClick={() => setPayOpen(true)}>＋ Record payment</Btn> : undefined}
+          title={<span className="inline-flex items-center gap-2"><IconCreditCard size={16} /> Payments to transporter <Badge tone="purple">Administrator only</Badge></span>}
+          actions={r.transport.transporter ? <Btn small variant="success" onClick={() => setPayOpen(true)}><IconPlus size={15} /> Record payment</Btn> : undefined}
         >
           <PaymentsTable rows={data.payments ?? []} currency={data.currency ?? ""} transporters={r.transport.transporter ? [r.transport.transporter] : []} onChanged={reload} showRecord={false} />
         </Card>
@@ -262,7 +282,10 @@ export default function RecordDetail({ id }: { id: number }) {
         <Card title="Validation errors for this record" className="mt-5">
           <ul className="space-y-1 text-sm">
             {data.errors.map((e) => (
-              <li key={e.id}>❌ <b>{e.fieldName}</b> “{e.enteredValue}” — {e.errorMessage} <span className="text-xs text-slate-400">{fmtDateTime(e.createdAt)}</span> {e.resolved && <Badge tone="green">Resolved</Badge>}</li>
+              <li key={e.id} className="flex items-start gap-1.5">
+                <IconAlertTriangle size={14} className="mt-0.5 shrink-0 text-red-500" />
+                <span><b>{e.fieldName}</b> “{e.enteredValue}” — {e.errorMessage} <span className="text-xs text-slate-400">{fmtDateTime(e.createdAt)}</span> {e.resolved && <Badge tone="green">Resolved</Badge>}</span>
+              </li>
             ))}
           </ul>
         </Card>
@@ -271,7 +294,10 @@ export default function RecordDetail({ id }: { id: number }) {
         <Card title="Email notifications" className="mt-5">
           <ul className="space-y-1 text-sm">
             {data.emails.map((e) => (
-              <li key={e.id}>✉ {e.label} → {e.recipient} <Badge tone={e.status === "sent" ? "green" : "red"}>{e.status}</Badge> <span className="text-xs text-slate-400">{fmtDateTime(e.createdAt)}</span></li>
+              <li key={e.id} className="flex items-start gap-1.5">
+                <IconMail size={14} className="mt-0.5 shrink-0 text-slate-400" />
+                <span>{e.label} → {e.recipient} <Badge tone={e.status === "sent" ? "green" : "red"}>{e.status}</Badge> <span className="text-xs text-slate-400">{fmtDateTime(e.createdAt)}</span></span>
+              </li>
             ))}
           </ul>
         </Card>

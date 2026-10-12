@@ -45,7 +45,7 @@ export default function EmailsPage() {
       </Card>
       {error && <ErrorBox>{error}</ErrorBox>}
       <Card className="!p-0">
-        {loading && !data ? <Loading /> : !data?.rows.length ? <Empty>No emails yet. Configure recipients and SMTP in Settings → Email.</Empty> : (
+        {loading && !data ? <Loading /> : !data?.rows.length ? <Empty>No emails yet. Configure recipients and SMTP in Settings &gt; Email.</Empty> : (
           <TableWrap>
             <table className="w-full min-w-[900px]">
               <thead><tr>{["Date", "Recipient", "Report", "Subject", "Status", "Type", ""].map((h) => <th key={h} className={thCls}>{h}</th>)}</tr></thead>

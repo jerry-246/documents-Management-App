@@ -8,7 +8,7 @@ export const GET = route("records.view", async ({ req, actor }) => {
   const f = filtersFromParams(req.nextUrl.searchParams);
   f.pageSize = Math.min(200, f.pageSize ?? 25);
   f.page = f.page ?? 1;
-  if (f.archived !== "0" && !(await can(actor.role, "records.archive"))) f.archived = "0";
+  if (f.archived !== "0" && !can(actor, "records.archive")) f.archived = "0";
   const { rows, total } = await queryRecords(f, await getCtx(actor.role === "admin"));
   return { rows, total, page: f.page, pageSize: f.pageSize };
 });

@@ -2,6 +2,7 @@
 import { useRef, useState } from "react";
 import { apiFetch, Badge, Btn, Empty, ErrorBox, inputCls, Loading, TableWrap, tdCls, thCls, useApi, useSession, useUI } from "./ui";
 import { fmtDateTime } from "@/lib/time";
+import { IconFile, IconTrash, IconUpload } from "./icons";
 
 interface DocFile {
   id: number;
@@ -100,7 +101,9 @@ export default function RecordDocuments({ recordId, archived }: { recordId: numb
               accept=".pdf,.png,.jpg,.jpeg,.webp,.gif,.tif,.tiff,.doc,.docx,.xls,.xlsx,.txt,.csv"
             />
           </div>
-          <Btn onClick={upload} disabled={busy}>{busy ? "Uploading…" : "⬆ Upload"}</Btn>
+          <Btn onClick={upload} disabled={busy}>
+            <IconUpload size={16} /> {busy ? "Uploading…" : "Upload"}
+          </Btn>
           {!data.storageConfigured && <span className="text-xs text-amber-600">Storage not configured — ask an administrator.</span>}
         </div>
       )}
@@ -121,7 +124,9 @@ export default function RecordDocuments({ recordId, archived }: { recordId: numb
               {data.documents.map((d) => (
                 <tr key={d.id}>
                   <td className={tdCls}>
-                    <button type="button" onClick={() => download(d)} className="font-medium text-blue-600 hover:underline">📄 {d.fileName}</button>
+                    <button type="button" onClick={() => download(d)} className="inline-flex items-center gap-1.5 font-medium text-blue-600 hover:underline">
+                      <IconFile size={15} className="shrink-0" /> {d.fileName}
+                    </button>
                   </td>
                   <td className={tdCls}>{d.docType ? <Badge tone="blue">{TYPE_LABEL[d.docType] ?? d.docType}</Badge> : <span className="text-slate-400">General</span>}</td>
                   <td className={tdCls}>{fmtSize(d.sizeBytes)}</td>
@@ -130,7 +135,13 @@ export default function RecordDocuments({ recordId, archived }: { recordId: numb
                     {d.uploadedByPosition ? <span className="text-xs text-slate-400"> ({d.uploadedByPosition})</span> : null}
                   </td>
                   <td className={tdCls}>{fmtDateTime(d.createdAt)}</td>
-                  <td className={`${tdCls} text-right`}>{canManage && <Btn small variant="ghost" onClick={() => remove(d)}>🗑 Delete</Btn>}</td>
+                  <td className={`${tdCls} text-right`}>
+                    {canManage && (
+                      <Btn small variant="ghost" onClick={() => remove(d)}>
+                        <IconTrash size={14} /> Delete
+                      </Btn>
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>

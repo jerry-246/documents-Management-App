@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { fmtDateTime } from "@/lib/time";
 import { ApiError, apiFetch, Badge, Btn, Card, Empty, ErrorBox, Field, inputCls, Loading, Modal, PageHeader, qs, Stat, TableWrap, tdCls, thCls, useApi, useDebounced, useUI } from "@/components/ui";
+import { IconPlus } from "@/components/icons";
 
 interface Agent {
   id: number; name: string; licenseNo: string | null; tin: string | null; contactPerson: string | null; phone: string | null; email: string | null;
@@ -76,7 +77,7 @@ export default function AgentsPage() {
       <PageHeader
         title="Clearing & Forwarding Agents"
         subtitle="Administrator only — agents listed here are the only ones staff can select on a record. Blocked agents cannot be selected."
-        actions={<Btn onClick={() => setEdit({ ...EMPTY })}>＋ Add agent</Btn>}
+        actions={<Btn onClick={() => setEdit({ ...EMPTY })}><IconPlus size={16} /> Add agent</Btn>}
       />
       {data && (
         <div className="mb-4 grid grid-cols-3 gap-3 md:max-w-xl">
@@ -98,7 +99,7 @@ export default function AgentsPage() {
       {error && <ErrorBox>{error}</ErrorBox>}
       <Card className="!p-0">
         {loading && !data ? <Loading /> : !data?.rows.length ? (
-          <Empty>No agents yet. Click “＋ Add agent” — records cannot be saved until at least one active agent exists.</Empty>
+          <Empty>No agents yet. Click “Add agent” — records cannot be saved until at least one active agent exists.</Empty>
         ) : (
           <TableWrap>
             <table className="w-full min-w-[1000px]">

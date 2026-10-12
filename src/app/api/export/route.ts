@@ -22,7 +22,7 @@ export const GET = route("reports.export", async ({ req, actor }) => {
   const format = sp.get("format") ?? "xlsx";
   if (!["csv", "xlsx", "pdf"].includes(format)) throw new HttpError(400, "Unsupported format");
   const need: Record<string, Permission> = { errors: "errors.view", audit: "audit.view", emails: "emails.view", expiry: "expiry.view" };
-  if (need[type] && !(await can(actor.role, need[type]))) throw new HttpError(403, "You do not have permission to export this.");
+  if (need[type] && !can(actor, need[type])) throw new HttpError(403, "You do not have permission to export this.");
 
   const all = new URLSearchParams(sp);
   all.set("all", "1");
